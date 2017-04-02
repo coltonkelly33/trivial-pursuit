@@ -102,7 +102,7 @@ public class Game {
     // Once the player leaves a spoke, they will move around the board in a clockwise fasion.
     private void move(Player player)
     {
-        switch (player.position)
+        switch (SPACE_CATEGORIES[player.position])
         {
             // moves the player from the wheel space. this is random right now, but front end should
             // implement an actionListener to allow the player to choose which spoke they want to go to
