@@ -232,7 +232,12 @@ public class Game {
         System.out.println("Do you want to answer the question, or try and stump your opponents? (Enter 1 to answer or 2 to stump)");
         
         //if the player chooses to answer
-        if(userInput.nextInt() == 1)
+        int input;
+        if(player.human)
+            input = userInput.nextInt();
+        else
+            input = simpleAI(1);
+        if(input == 1)
         {
             System.out.println("Here are your choices. Enter the number for your selection:");
             int i = 0;
@@ -243,7 +248,11 @@ public class Game {
             // get their response. if its correct, move them to the proper space
             // and return the category of the answered question (waaaay at the
             // bottom)
-            if(userInput.nextInt() == card.correctAnsIndex)
+            if(player.human)
+                input = userInput.nextInt();
+            else
+                input = simpleAI(2);
+            if(input == card.correctAnsIndex)
             {
                 switch(card.category)
                 {
@@ -295,7 +304,11 @@ public class Game {
                         System.out.println(i++ + ". " + s);
                     }
                     // and record their response in the frequency array
-                    temp[userInput.nextInt()]++;
+                    if(p.human)
+                        input = userInput.nextInt();
+                    else
+                        input = simpleAI(2);
+                    temp[input]++;
                 }
             }
             // if the council's answer is correct...
@@ -392,20 +405,46 @@ public class Game {
         // It should never get down to here. If this ever returns -1, theres a problem.
         return -1;
     }
+    
+    // Daniel:
+    // Takes in a single integer representing what choice the AI needs to make
+    // and outputs its choice as an iteger.
+    private int simpleAI(int choice)
+    {
+        switch(choice)
+        {
+            //decide direction to move on wheel space
+            case 0:
+                return Die.rollThatSucker();
+            // answer or stump
+            case 1:
+                return (int)(Math.random() * 2) + 1;
+            // answer a question (or provide an answer for stumping)
+            case 2:
+                return (int)(Math.random() * 4);
+            default:
+                break;
+        }
+        System.out.println("Uh oh, something's gone wrong with the AI.");
+        return -1;
+    }
 
     // this is just a test drive. I'm assuming we'll get player array from
     // the GUI class
     public static void main(String[] args) throws IOException {
         Player[] testPlayers = new Player[3];
+        
         for (int i = 0; i < testPlayers.length; i++) {
             testPlayers[i] = new Player("Shia LaBeouf" + Integer.toString(i));
         }
+        testPlayers[0].human = true;
+        testPlayers[1].human = false;
+        testPlayers[2].human = false;
+        
         Game game = new Game(testPlayers);
         for (Player player : testPlayers) {
             System.out.println(player.getPlayerName() + " " + player.getTurnOrder());
         }
-        
-        game.players[0].position = 72;
         
         Player winner = game.playGame();
         
