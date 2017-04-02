@@ -15,6 +15,13 @@ public class Player {
     String playerName;
     //The player's position on the board, as per the space map
     int position = 0;
+    
+    //name constructor for Player
+    public Player(String playerName)
+    {
+        this.playerName = playerName;
+        this.position = 0;
+    }
 
     //returns the integer that denotes the player's current space
     public int getPosition() {
