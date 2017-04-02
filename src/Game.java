@@ -77,9 +77,36 @@ public class Game {
         }
     }
     
+    // Daneil:
+    // plays the entire ding-dang game, all in one method.
+    // returns the winner
+    private Player playGame()
+    {
+        boolean gameOver = false;
+        Player winner = null;
+        // while the game isn't over...
+        while(!gameOver)
+        {
+            // for each player...
+            for(Player p: players)
+            {
+                // play our their turn. If they received all wedges...
+                if(playTurn(p))
+                {
+                    // the game is over
+                    gameOver = true;
+                    winner = p;
+                    break;
+                }
+            }
+        }
+        //return the dood who won
+        return winner;
+    }
+    
     // Daniel:
     // runs through a single turn for a single player
-    private void playTurn(Player player)
+    private boolean playTurn(Player player)
     {
         System.out.println(player.playerName + ", it's your turn!");
         
@@ -92,8 +119,33 @@ public class Game {
             move(player);
         System.out.println("You're now on space " + player.position);
         
-        //then ask the player their question
+        // then ask the player their question
         Category temp = questionTime(player);
+        
+        // award the player a wedge if they deserve it
+        if(temp != null)
+        {
+            player.setWedge(temp);
+            // if the player has all the requisite wedges, they won
+            if(checkWedges(player))
+                return true;
+        }
+        // otherwise, the game continues
+        return false;
+    }
+    
+    // Daniel:
+    // Checks if a player has all their wedges in a row
+    // returns true if they do
+    private boolean checkWedges(Player player)
+    {
+        boolean temp = true;
+        for(Boolean b: player.wedges)
+        {
+            if(b == false)
+                temp = false;
+        }
+        return temp;
     }
     
     // Daniel:
@@ -102,7 +154,7 @@ public class Game {
     // Once the player leaves a spoke, they will move around the board in a clockwise fasion.
     private void move(Player player)
     {
-        switch (SPACE_CATEGORIES[player.position])
+        switch(player.position)
         {
             // moves the player from the wheel space. this is random right now, but front end should
             // implement an actionListener to allow the player to choose which spoke they want to go to
@@ -141,7 +193,7 @@ public class Game {
         }
     }
     
-    // Daniel: (IN PROGRESS)
+    // Daniel:
     // goes through the process of answering a question from start to finish
     // returns the category of a successfully completed question, null otherwise
     private Category questionTime(Player player)
@@ -151,7 +203,7 @@ public class Game {
         // with screen prompts and buttons
         Scanner userInput = new Scanner(System.in);
         //draw a card for the appropriate category. return null if on a white space
-        switch(player.position)
+        switch(SPACE_CATEGORIES[player.position])
         {
             case 1:
                 card = cardDeck.drawRandomCard(Category.SPORTS);
@@ -188,65 +240,130 @@ public class Game {
             for(String s: card.choices)
                 System.out.println(i++ + ". " + s);
             
-            // get their response. return the card category if answered correctly,
-            // null if incorrectly
+            // get their response. if its correct, move them to the proper space
+            // and return the category of the answered question (waaaay at the
+            // bottom)
             if(userInput.nextInt() == card.correctAnsIndex)
-                return card.category;
+            {
+                switch(card.category)
+                {
+                    case SPORTS:
+                        player.position = 29;
+                        break;
+                    case SCIENCE: 
+                        player.position = 8;
+                        break;
+                    case PLACES:
+                        player.position = 22;
+                        break;
+                    case EVENTS:
+                        player.position = 36;
+                        break;
+                    case ENTERTAINMENT:
+                        player.position = 1;
+                        break;
+                    case ARTS:
+                        player.position = 15;
+                        break;
+                    default:
+                        break;
+                }
+            }
+            //if they got a fail whale, return null (no wedge given)
             else
                 return null;
         }
-        //if the player chooses to stump (still commenting this)
+        // if the player chooses to stump...
         else
         {
             System.out.println(player.playerName + " has chosen to stump their opponents! Get ready everyone...");
+            //frequency array for stump choices
             int [] temp = new int[card.choices.length];
+            
+            // for each player...
             for(Player p: players)
             {
+                // that isn't the stumper...
                 if(p != player)
                 {
                     int i = 0;
+                    // ask them the question...
                     System.out.println(p.playerName + " enter the number of your selected choice.");
                     System.out.println(card.question);
                     for(String s: card.choices)
                     {
                         System.out.println(i++ + ". " + s);
                     }
+                    // and record their response in the frequency array
                     temp[userInput.nextInt()]++;
                 }
             }
+            // if the council's answer is correct...
             if(decideChoice(temp) == card.correctAnsIndex)
             {
+                // STUMPED NERD!!! LELELELL. All other players move foreward a space
                 System.out.println("Uh-oh, your oppenents managed to stump you! They all moved forewar one space.");
                 for(Player p: players)
                 {
                     if(player != p)
                         move(p);
                 }
+                // no wedge for you.
+                return null;
             }
+            // if the council's judgement was mistaken...
             else
             {
+                // move the stumper to the respective home space for the
+                // question category
                 System.out.println("Hooray! Your opponents couldn't answer the question so the " + card.category + "wedge goes to you.");
-                // TODO: Move player to respective home space. This also needs
-                //to be done if the player answers their own question correctly
+                switch(card.category)
+                {
+                    case SPORTS:
+                        player.position = 29;
+                        break;
+                    case SCIENCE: 
+                        player.position = 8;
+                        break;
+                    case PLACES:
+                        player.position = 22;
+                        break;
+                    case EVENTS:
+                        player.position = 36;
+                        break;
+                    case ENTERTAINMENT:
+                        player.position = 1;
+                        break;
+                    case ARTS:
+                        player.position = 15;
+                        break;
+                    default:
+                        return null;
+                }
             }
         }
-        
+        return card.category;
     }
     
+    // Daniel:
+    // This function is the council's deliberation.
+    // Takes in the frequency array of the stumpees' answers and returns either
+    // the most frequent answer, or a random tie breaker of multiple 'most
+    // frequent' answers.
     private int decideChoice(int [] choiceFrequency)
     {
         int highestFrequency = 0;
         int tieBreaker = 0;
         boolean [] choices = new boolean[choiceFrequency.length];
         
-        //run through the selected choices to find the highest observed choice frequency
+        // run through the selected choices to find the highest observed choice frequency
         for(Integer i: choiceFrequency)
         {
             if(highestFrequency < i)
                 highestFrequency = i;
         }
         
-        //run though it again, flipping the boolean associated with choices with the highest frequency
+        // run though it again, flipping the boolean associated with choices with the highest frequency
         int j = 0;
         for(Integer i: choiceFrequency)
         {
@@ -258,6 +375,8 @@ public class Game {
             j++; 
         }
         
+        // j becomes the number of most frequent choices we have to hit
+        // until we are on the one selected for the tie breaker.
         j = (int)(Math.random() * tieBreaker) + 1;
         int i = 0;
         for(Boolean b: choices)
@@ -286,10 +405,10 @@ public class Game {
             System.out.println(player.getPlayerName() + " " + player.getTurnOrder());
         }
         
-        System.out.println(game.players[0].position);
-        for(int i = 0; i < 6; i++)
-            game.move(game.players[0]);
+        game.players[0].position = 72;
         
-        System.out.println(game.players[0].position);
+        Player winner = game.playGame();
+        
+        System.out.println(winner.playerName + " won the game!");
     }
 }
