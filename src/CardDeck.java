@@ -6,7 +6,7 @@ import java.util.*;
  * Created by Colton on 3/30/2017.
  */
 
-//TODO mark Cards as 'used' (or just remove them from their lists in the deck). ()
+//TODO mark Cards as 'used' (or just remove them from their lists in the deck).
 
 public class CardDeck {
 
@@ -89,6 +89,6 @@ public class CardDeck {
 
         return temp.remove(randomCard);
 
-//        return temp.get((int)(Math.random() * temp.size()));
+        // return temp.get((int)(Math.random() * temp.size()));
     }
 }
