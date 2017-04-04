@@ -9,7 +9,7 @@
  * @author Daniel
  */
 public class Die {
-
+    
     //roll's the die
     public static int rollThatSucker()
     {
@@ -17,4 +17,3 @@ public class Die {
         return roll;
     }
 }
-
