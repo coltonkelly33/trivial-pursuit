@@ -71,6 +71,10 @@ public class TrivialPursuitGUI extends JFrame {
         private boolean playing_number_selection_menu;
         private boolean name_entry_menu;
         private boolean game_piece_menu;
+        private boolean your_turn;
+        private boolean roll_dice;
+        private boolean rolled;
+        private int current_roll;
 
         // the current player being configured in the players array
         private int current_player_setup;
@@ -216,6 +220,19 @@ public class TrivialPursuitGUI extends JFrame {
                         }
                     }
 
+                    if (rolled) {
+                        roll_dice = false;
+                    }
+
+                    if (roll_dice) {
+                        your_turn = false;
+                        rolled = true;
+                    }
+
+                    if (your_turn) {
+                        roll_dice = true;
+                    }
+
                     super.mousePressed(e);
                 }
 
@@ -305,6 +322,17 @@ public class TrivialPursuitGUI extends JFrame {
                 System.out.println("Setup complete, start the game");
                 try {
                     game = new Game(players);
+
+                    for (Player player : players) {
+                        for (Category cat : Category.values()) {
+                            if (player.getGamePiece() == 0)
+                                player.setWedge(cat);
+                            else if (Math.random() < 0.5)
+                                player.setWedge(cat);
+                        }
+                    }
+
+                   your_turn = true;
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -343,6 +371,20 @@ public class TrivialPursuitGUI extends JFrame {
             if (start_menu) {
                 drawLoadingScreen(g);
                 drawStartMenu(g);
+            }
+
+            if (rolled) {
+                drawYouRolled(g, current_roll);
+            }
+
+            if (roll_dice) {
+                drawRollDice(g);
+                current_roll = Die.rollThatSucker();
+            }
+
+            if (your_turn) {
+                // this needs to get the current player from the Game obj
+                drawYourTurn(g, players[0]);
             }
 
             // handles fading
@@ -424,7 +466,7 @@ public class TrivialPursuitGUI extends JFrame {
          *
          * @param g the Graphics2D/Graphics object to draw on
          */
-        private void drawGamePieceSelectionMenu(Graphics2D g) {
+        private void  drawGamePieceSelectionMenu(Graphics2D g) {
             image = graphicAssets.getImage("game_Piece_Select_Landscape.png");
             g.drawImage(image, getWidth() / 2 - image.getWidth(null) / 2, getHeight() / 2 - image.getHeight(null) / 2, null);
 
@@ -663,6 +705,50 @@ public class TrivialPursuitGUI extends JFrame {
                 // offset the y coordinate for the next player card
                 y += graphicAssets.scaledCoordinate(144);
             }
+        }
+
+        private void drawYourTurn(Graphics2D g, Player player) {
+
+            image = graphicAssets.getImage("your_Turn_Popup.png");
+            g.drawImage(image, getWidth() / 2 - image.getWidth(null) / 2, (getHeight() - image.getHeight(null)) / 2, this);
+
+            g.setColor(Color.white);
+            g.setFont(new Font("Calibri", Font.BOLD, 50));
+            g.drawString(player.getPlayerName(), getWidth() / 2 - graphicAssets.scaledCoordinate(330), getHeight() / 2 + graphicAssets.scaledCoordinate(70));
+
+        }
+
+        private void drawRollDice(Graphics2D g) {
+            image = graphicAssets.getImage("roll_Dice.png");
+            g.drawImage(image, getWidth() / 2 - image.getWidth(null) / 2, (getHeight() - image.getHeight(null)) / 2, this);
+
+        }
+
+        private void drawYouRolled(Graphics2D g, int roll) {
+
+            switch (roll) {
+                case 1:
+                    image = graphicAssets.getImage("roll_Dice_1.png");
+                    break;
+                case 2:
+                    image = graphicAssets.getImage("roll_Dice_2.png");
+                    break;
+                case 3:
+                    image = graphicAssets.getImage("roll_Dice_3.png");
+                    break;
+                case 4:
+                    image = graphicAssets.getImage("roll_Dice_4.png");
+                    break;
+                case 5:
+                    image = graphicAssets.getImage("roll_Dice_5.png");
+                    break;
+                case 6:
+                    image = graphicAssets.getImage("roll_Dice_6.png");
+                    break;
+                default:
+                    break;
+            }
+            g.drawImage(image, getWidth() / 2 - image.getWidth(null) / 2, (getHeight() - image.getHeight(null)) / 2, this);
         }
 
         @Override
